@@ -23,9 +23,12 @@ IMU-foot-strike-detection/
 ├── data/
 │   └── data-set/               ← Download NEWBEE dataset here (see below)
 ├── matlab/
+│   ├── biomechZoo/
+│   └── main.m
+│   ├── preprocessing/
 │   ├── Toolboxes/
 │   │   └── REID_IMU_Running_Event_ID/   ← Download REID toolbox here (see below)
-│   └── [analysis scripts]
+│   ├── utils/
 ├── python_code/
 │   ├── src/
 │   ├── main.py
