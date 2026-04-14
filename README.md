@@ -23,7 +23,7 @@ IMU-foot-strike-detection/
 ├── data/
 │   └── data-set/               ← Download NEWBEE dataset here (see below)
 ├── matlab/
-│   ├── biomechZoo/
+│   ├── biomechZoo/             ← Download biomechZoo dataset here (see below)
 │   └── main.m
 │   ├── preprocessing/
 │   ├── Toolboxes/
@@ -64,7 +64,7 @@ The toolbox implements 21 published gait event detection methods, of which we us
 returns timings of initial and terminal contact events.
 
 **Setup instructions**
-1. Clone or download the REID toolbox from the link aboce
+1. Clone or download the REID toolbox from the link above
 2. Place the toolbox forlder into the following location within this repository: 
 
 ```
@@ -72,6 +72,23 @@ matlab/Toolboxes/
 ```
 
 > If the `matlab/Toolboxes/` directory does not exist, create it manually before placing the toolbox.
+
+
+### 3. BiomechZoo
+This repository relies on the **biomechZoo** toolbox for several utility functions:
+
+> *Dixon PC, (2017) biomechZoo: An open-source toolbox for the processing, analysis, and visualization of biomechanical movement data*
+> Available at: https://github.com/PhilD001/biomechZoo
+
+**Setup instructions**
+1. Clone or download the biomechZoo toolbox from the link above
+2. Place the toolbox forlder into the following location within this repository: 
+
+```
+matlab/biomechZoo/
+```
+
+> If the `matlab/biomechZoo/` directory does not exist, create it manually before placing the toolbox.
 
 ---
 
@@ -121,4 +138,6 @@ If you use this code, please cite both the manuscript and the original toolbox:
 > V. Losing, M. Hasenjäger, NEWBEE: A multi-modal gait database of natural everyday-walk in an urban environment, collection (2022).
 doi:10.6084/m9.figshare.c.5758997.v1.
 
+**BiomechZoo toolbox:**
+>Dixon PC, Loh JJ, Michaud-Paquette Y, Pearsall DJ. biomechZoo: An open-source toolbox for the processing, analysis, and visualization of biomechanical movement data, Computer Methods and Programs in Biomedicine, Volume 140, 2017, Pages 1-10, https://doi.org/10.1016/j.cmpb.2016.11.007.
 ---
