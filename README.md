@@ -13,7 +13,7 @@ submitted to Gait and Posture April 2026
 
 This repository provides the MATLAB and Python code used to evaluate IMU-based footstrike detection algorithms on walking data. 
 The pipeline applies and benchmarks a set of established gait event detection methods using a multi-modal dataset collected 
-in a real-world urban enviromnent. 
+in a real-world urban environment. 
 
 ---
 
@@ -51,7 +51,7 @@ The analysis in this manuscript uses the **NEWBEE** dataset:
 data/
 ```
 
-> if the data/ directory does not exists, creat it manually before placing the data.
+> if the data/ directory does not exist, create it manually before placing the data.
 ---
 
 ### 2. Gait Event Detection Toolbox -- REID_IMU
@@ -105,7 +105,7 @@ addpath(genpath("./"))
 
 Per algorithm foot-strike detection results are saved in: 
 ```
-data/toobox1
+data/toolbox1
 ```
 
 ---
