@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+/data/data_set
+/data
+/matlab/biomechZoo
+/matlab/Toolboxes/REID_IMU_Running_Event_ID
