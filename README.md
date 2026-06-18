@@ -73,6 +73,23 @@ matlab/Toolboxes/
 
 > If the `matlab/Toolboxes/` directory does not exist, create it manually before placing the toolbox.
 
+**Small changes**
+The following changes need to be applied to the source code from Kiernan et al. to make it work on lower frequency walking data (i.e. sampling rate of 60Hz instead of 200Hz)
+
+1. in *REID_IMU_Running_Event_ID.m* change lines 127 to 131 to:
+
+```matlab
+max_step_freq = 2.17; % maximum 4.75 steps per second
+min_stance_t = 300; % minimum 95 ms stance time
+max_stance_t = 1300; % maximum 270 ms stance time | based on 60% of a cadance of 2.17 where 1 step takes 1000 ms
+min_swing_t = 200; % minimum 200 ms swing time
+max_swing_t = 868; % maximum 600 ms swing time | based on 60% of a cadance of 2.17 where 1 step takes 1000 ms
+```
+
+2. in *REID_IMU_AminianODonovan.m* change line 202 to ```IC = round(IC'*Fs/Fs_Aminian);```
+3. in *REID_IMU_AminianODonovan.m* change line 203 to ```TC = round(TC'*Fs/Fs_Aminian);```
+4. in *REID_IMU_Sinclair.m*  comment out lines 17 to 20 that partain to filtering. 
+5. in *REID_IMU_Sinclair.m* add around line 21 ```data_filt = data;```
 
 ### 3. BiomechZoo
 This repository relies on the **biomechZoo** toolbox for several utility functions:
@@ -100,7 +117,7 @@ addpath(genpath("./"))
 ```
 2. Run the main analysis script:
 ```matlab
-% main.m
+run main.m
 ```
 
 Per algorithm foot-strike detection results are saved in: 
@@ -122,7 +139,7 @@ pip install [biomechzoo]
 2. run the main analysis script
 
 ```python
-main.py
+run main.py
 ```
 
 ## Citation
