@@ -65,7 +65,7 @@ returns timings of initial and terminal contact events.
 
 **Setup instructions**
 1. Clone or download the REID toolbox from the link above
-2. Place the toolbox forlder into the following location within this repository: 
+2. Place the toolbox folder into the following location within this repository: 
 
 ```
 matlab/Toolboxes/
@@ -90,6 +90,12 @@ max_swing_t = 868; % maximum 600 ms swing time | based on 60% of a cadance of 2.
 3. in *REID_IMU_AminianODonovan.m* change line 203 to ```TC = round(TC'*Fs/Fs_Aminian);```
 4. in *REID_IMU_Sinclair.m*  comment out lines 17 to 20 that partain to filtering. 
 5. in *REID_IMU_Sinclair.m* add around line 21 ```data_filt = data;```
+
+6. (optional) to remove the need for the user to click on a folder at each run, in *REID_IMU_Running_Event_ID.m* change lines 118 to: 
+
+subfunction_path = fileparts(mfilename('fullpath'));
+
+
 
 ### 3. BiomechZoo
 This repository relies on the **biomechZoo** toolbox for several utility functions:
