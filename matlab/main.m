@@ -5,7 +5,7 @@ addpath(genpath("./")) % adds all subfolders of the current working direcotry
 % read all file names and extract the first one for testing purposes
 root = pwd;
 fld = root + "/data";
-
+warning('off','all')
 %% Toolbox 1: Kiernan et. al
 % https://github.com/DovinKiernan/REID_IMU_Running_Event_ID
 % read all files 
