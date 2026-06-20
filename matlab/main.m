@@ -37,13 +37,7 @@ for fn = 1:length(fl_X)
     data = preprocessing_t1(raw_df);
 
     % extract "golden standard"
-    [HS_r,HS_l] = extract_goldenstandard(raw_output);
-
-    y_timings_r = [HS_r, zeros(length(HS_r), 1)];
-    y_timings_l = [HS_l, ones(length(HS_l), 1)];
-
-    y_timings = [y_timings_r; y_timings_l];
-    results.y = sortrows(y_timings, 1);
+    [results.y_HS, results.y_FO] = extract_goldenstandard(raw_output);
 
     % ----Run the models----
     shank_methods = {'Mizrahi', 'Mercer','Purcell', 'AminianODonovan', ...
