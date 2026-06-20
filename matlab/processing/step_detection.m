@@ -1,4 +1,4 @@
-function [y_hat] = step_detection(data, algorithm, location)
+function [y_hat_HS, y_hat_FO] = step_detection(data, algorithm, location)
 %STEP_DETECTION Code to perform step detection using "Toolbox 1" 
 %   Detailed explanation goes here
 
@@ -29,12 +29,26 @@ function [y_hat] = step_detection(data, algorithm, location)
                 timings_l.Properties.VariableNames = {'initial_contact', 'terminal_contact', 'left_stance'};
             end
             
-            % create heel strike and toe off tabels of the method
+            % create heel strike tabels of the method
             HS_r_hat = [X_Rshank(timings_r.initial_contact, 1), timings_r.left_stance];
             HS_l_hat = [X_Lshank(timings_l.initial_contact, 1), timings_l.left_stance]; 
-    
+            % combine and sort heel strikes
             y_hat_timings = [HS_r_hat;HS_l_hat];
-            y_hat = sortrows(y_hat_timings);
+            y_hat_HS = sortrows(y_hat_timings);
+            
+            clear y_hat_timings
+            % Create foot off tabels of the method
+            % Remove all NaN.
+            timings_r_non_nan = rmmissing(timings_r);
+            timings_l_non_nan = rmmissing(timings_l);
+            % Built table
+            FO_r_hat = [X_Rshank(rmmissing(timings_r_non_nan.terminal_contact), 1), timings_r_non_nan.left_stance];
+            FO_l_hat = [X_Lshank(timings_l_non_nan.terminal_contact, 1), timings_l_non_nan.left_stance];
+    
+            % Combine and sort Foot off
+            y_hat_timings = [FO_r_hat;FO_l_hat];
+            y_hat_FO = sortrows(y_hat_timings);
+            clear y_hat_timings
 
         case "lower_back"
             try 
@@ -46,13 +60,17 @@ function [y_hat] = step_detection(data, algorithm, location)
     
     
             try 
-                y_hat = [X_pelvis(timings.initial_contact, 1), timings.left_stance];
+                % create heel strike tabel of the method
+                y_hat_HS = [X_pelvis(timings.initial_contact, 1), timings.left_stance];
+                % create foot off table of the method
+                timings_non_nan = rmmissing(timings);
+                y_hat_FO = [X_pelvis(timings_non_nan.terminal_contact, 1), timings_non_nan.left_stance];
             catch ME
                 switch ME.identifier
                     case 'MATLAB:badsubscript'
                         timings = array2table(zeros(0,3));
                         timings.Properties.VariableNames = {'initial_contact', 'terminal_contact', 'left_stance'};
-                        y_hat = [X_pelvis(timings.initial_contact, 1), timings.left_stance];
+                        y_hat_HS = [X_pelvis(timings.initial_contact, 1), timings.left_stance];
                 end
             end
     end

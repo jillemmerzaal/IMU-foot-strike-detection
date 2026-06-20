@@ -52,7 +52,7 @@ for fn = 1:length(fl_X)
     
     for a = 1:length(shank_methods)
         algorithm = shank_methods{a};
-        results.y_hat = step_detection(data, algorithm, "shank");
+        [results.y_hat_HS, results.y_hat_FO] = step_detection(data, algorithm, "shank");
         save_fld = fullfile(fld, "toolbox1", algorithm);
         
         if ~exist(save_fld, 'dir')
@@ -67,7 +67,7 @@ for fn = 1:length(fl_X)
     
     for a = 1:length(lb_methods) 
         algorithm = lb_methods{a};
-        results.y_hat = step_detection(data, algorithm, "lower_back");
+        [results.y_hat_HS, results.y_hat_FO] = step_detection(data, algorithm, "lower_back");
         save_fld = fullfile(fld, "toolbox1", algorithm);
         
         if ~exist(save_fld, 'dir')
