@@ -90,11 +90,17 @@ max_swing_t = 868; % maximum 600 ms swing time | based on 60% of a cadance of 2.
 3. in *REID_IMU_AminianODonovan.m* change line 203 to ```TC = round(TC'*Fs/Fs_Aminian);```
 4. in *REID_IMU_Sinclair.m*  comment out lines 17 to 20 that partain to filtering. 
 5. in *REID_IMU_Sinclair.m* add around line 21 ```data_filt = data;```
+6. in *REID_IMU_Whelan.m* replace line 37 with 
+```matlab
+if length(AP_min_ind:AP_max_ind(step_count+1)) >= 3
+    [mag_3, IC_temp] = findpeaks(AP_filt(AP_min_ind:AP_max_ind(step_count+1)),'SortStr','descend','NPeaks',1);
+end
+```
 
-6. (optional) to remove the need for the user to click on a folder at each run, in *REID_IMU_Running_Event_ID.m* change lines 118 to: 
-
+7. (optional) to remove the need for the user to click on a folder at each run, in *REID_IMU_Running_Event_ID.m* change lines 118 to: 
+```matlab
 subfunction_path = fileparts(mfilename('fullpath'));
-
+```
 
 
 ### 3. BiomechZoo
