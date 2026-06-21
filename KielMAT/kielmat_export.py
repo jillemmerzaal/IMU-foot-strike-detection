@@ -1,4 +1,5 @@
 from pathlib import Path
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.io import loadmat, savemat
@@ -8,8 +9,11 @@ from kielmat.modules.gsd import ParaschivIonescuGaitSequenceDetection
 from kielmat.modules.icd import ParaschivIonescuInitialContactDetection
 from kielmat.config import cfg_colors
 
-root = Path.cwd().parent
+root = Path.cwd()
+print(root)
 data_path = root / "data"
+print(data_path)
+
 
 # print(type(root), type(data_path))
 
@@ -17,6 +21,11 @@ file_list = list(data_path.rglob("xsens.csv"))
 
 
 def run_file(file_path):
+    id = file_path.parts[-2]
+    course = file_path.parts[-3]
+
+    print(f"running {id} {course}")
+
     data = pd.read_csv(file_path)
 
     sampling_frequency = 60 # 6 recordings in 100 ms -> 60 recordings per second
@@ -44,14 +53,18 @@ def run_file(file_path):
     icd = icd.detect(
         acceleration_data,
         sampling_frequency,
-        "acceleration_Pelvis_z"
+        "acceleration_Pelvis_z",
+        gait_sequences
     )
 
-    y_pred = icd.initial_contacts_['onset'].to_numpy().reshape(-1,1)*1000 # IC times in ms
+    temp = icd.initial_contacts_['onset'].to_numpy()*1000 # IC times in ms
+
+    y_pred = np.zeros((len(temp), 2)) 
+
+    y_pred[:,0] = temp
+
 
     # File naming convention {id}_{course}.mat
-    id = file_path.parts[-2]
-    course = file_path.parts[-3]
     y = get_ytrue(course,id)
 
     # Create a structure matching what the pipeline expects:
@@ -81,7 +94,6 @@ def get_ytrue(course, id):
     y_true = results.y
 
     return y_true
-    
 
 for file in file_list:
     run_file(file)

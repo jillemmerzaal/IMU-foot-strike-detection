@@ -18,6 +18,8 @@ missing_data(fld, "output")
 calculate_metrics(fld, "output", surface_split=False, fname="metrics_all.csv")
 
 df_all = pd.read_csv(os.path.join(root, "data","output", "metrics_all.csv"), index_col=0)
+df_all["algorithm"] = df_all["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
+
 
 # Set x and y columns
 x = "algorithm"
@@ -54,6 +56,8 @@ calculate_metrics(fld, "output", surface_split=True, fname="metrics_split.csv")
 
 # Calculate basis descriptives statistics per algorithms per surface.
 df_split = pd.read_csv(os.path.join(root, "data", "output", "metrics_split.csv"), index_col=0)
+df_split["algorithm"] = df_split["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
+
 # Only retain the best algorithm
 best = desired_order_algo[0]
 df_best = df_split[df_split.algorithm == best].copy().reset_index(drop=True)
@@ -90,6 +94,9 @@ fig_best.write_image(os.path.join(root, "data", "output", "error_best.png"), wid
 
 #%% Analysis per surface for all algorithms
 df_surface = pd.read_csv(os.path.join(root, "data", "output", "metrics_split.csv"), index_col=0)
+# Keep only the final path component in algorithm
+df_surface["algorithm"] = df_surface["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
+# (equivalent
 # df_segmented = pd.read_csv(os.path.join(outcome_fld, "results_segmented.csv"))
 
 # Set x and y columns
@@ -97,5 +104,9 @@ dim1 = "algorithm"
 x = "condition"
 y= "accuracy"
 
+
+
 fig_surface = box_segmented(df_surface, dim1, x, y, desired_order=desired_order_algo, points="outliers")
 fig_surface.write_image(os.path.join(root, "data", "output", "performance_surface.png"), width=1650, height=900, scale=1)
+
+# %%
