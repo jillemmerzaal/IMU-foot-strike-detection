@@ -11,7 +11,7 @@ submitted to Gait and Posture April 2026
 
 ## Overview
 
-This repository provides the MATLAB and Python code used to evaluate IMU-based footstrike detection algorithms on walking data. 
+This repository provides the MATLAB (Version R2023b) and Python (Version 3.11) code used to evaluate IMU-based footstrike detection algorithms on walking data. 
 The pipeline applies and benchmarks a set of established gait event detection methods using a multi-modal dataset collected 
 in a real-world urban environment. 
 
