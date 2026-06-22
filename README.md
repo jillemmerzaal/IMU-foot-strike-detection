@@ -73,6 +73,7 @@ matlab/Toolboxes/
 
 > If the `matlab/Toolboxes/` directory does not exist, create it manually before placing the toolbox.
 
+---
 **Small changes**
 The following changes need to be applied to the source code from Kiernan et al. to make it work on lower frequency walking data (i.e. sampling rate of 60Hz instead of 200Hz)
 
@@ -96,8 +97,15 @@ if length(AP_min_ind:AP_max_ind(step_count+1)) >= 3
     [mag_3, IC_temp] = findpeaks(AP_filt(AP_min_ind:AP_max_ind(step_count+1)),'SortStr','descend','NPeaks',1);
 end
 ```
-
-7. (optional) to remove the need for the user to click on a folder at each run, in *REID_IMU_Running_Event_ID.m* change lines 118 to: 
+7. in *REID_IMU_Whelan.m* add at line 30: ```IC_temp = [];```
+8. in *REID_IMU_crash_catch.m* add right before the function end: 
+```matlab
+% If the first IC is 0 
+if IC(1) == 0 
+    IC(1) = 2;
+end
+```
+9. (optional) to remove the need for the user to click on a folder at each run, in *REID_IMU_Running_Event_ID.m* change lines 118 to: 
 ```matlab
 subfunction_path = fileparts(mfilename('fullpath'));
 ```
