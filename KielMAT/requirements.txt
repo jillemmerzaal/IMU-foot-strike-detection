@@ -1,5 +1,0 @@
-kielmat
-numpy
-pandas
-matplotlib
-scipy==1.13.1
