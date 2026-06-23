@@ -7,9 +7,9 @@ submitted to Gait and Posture April 2026
 
 ## Overview
 
-This repository provides the MATLAB and Python code used to evaluate IMU-based footstrike detection algorithms on walking data.
-The pipeline applies and benchmarks a set of established gait event detection methods using a multi-modal dataset collected
-in a real-world urban environment.
+This repository provides the MATLAB (Version R2023b) and Python (Version 3.11) code used to evaluate IMU-based footstrike detection algorithms on walking data. 
+The pipeline applies and benchmarks a set of established gait event detection methods using a multi-modal dataset collected 
+in a real-world urban environment. 
 
 ---
 
@@ -78,10 +78,15 @@ matlab/Toolboxes/
 
 > If the `matlab/Toolboxes/` directory does not exist, create it manually before placing the toolbox.
 
-**Small changes**
-The following changes need to be applied to the source code from Kiernan et al. to make it work on lower frequency walking data (i.e. sampling rate of 60Hz instead of 200Hz)
+---
 
-1. in *REID_IMU_Running_Event_ID.m* change lines 127 to 131 to:
+### Required changes to REID_IMU source files
+
+The following edits must be applied to the REID_IMU toolbox to support walking data at 60 Hz (the original code targets running data at ≥200 Hz).
+
+#### `REID_IMU_Running_Event_ID.m`
+
+- **Lines 127–131:** replace the step frequency and stance/swing time constants:
 
 ```matlab
 max_step_freq = 2.17; % maximum 4.75 steps per second
@@ -91,11 +96,35 @@ min_swing_t = 200; % minimum 200 ms swing time
 max_swing_t = 868; % maximum 600 ms swing time | based on 60% of a cadance of 2.17 where 1 step takes 1000 ms
 ```
 
-2. in *REID_IMU_AminianODonovan.m* change line 202 to ``IC = round(IC'*Fs/Fs_Aminian);``
-3. in *REID_IMU_AminianODonovan.m* change line 203 to ``TC = round(TC'*Fs/Fs_Aminian);``
-4. in *REID_IMU_Sinclair.m*  comment out lines 17 to 20 that partain to filtering.
-5. in *REID_IMU_Sinclair.m* add around line 21 ``data_filt = data;``
-6. in *REID_IMU_Whelan.m* replace line 37 with
+- **Line 118 *(optional)*:** hardcode the subfunction path to avoid a folder selection dialog at each run:
+
+```matlab
+subfunction_path = fileparts(mfilename('fullpath'));
+```
+
+#### `REID_IMU_AminianODonovan.m`
+
+- **Lines 202–203:** Ensure integers for IC and TC:
+
+```matlab
+IC = round(IC'*Fs/Fs_Aminian);
+TC = round(TC'*Fs/Fs_Aminian);
+```
+
+#### `REID_IMU_Sinclair.m`
+
+- **Lines 17–20:** comment out the filtering block.
+- **Line 21:** add `data_filt = data;`
+
+#### `REID_IMU_Whelan.m`
+
+- **Line 30:** initialise `IC_temp` before the loop:
+
+```matlab
+IC_temp = [];
+```
+
+- **Line 37:** guard the `findpeaks` call against short segments:
 
 ```matlab
 if length(AP_min_ind:AP_max_ind(step_count+1)) >= 3
@@ -103,10 +132,15 @@ if length(AP_min_ind:AP_max_ind(step_count+1)) >= 3
 end
 ```
 
-7. (optional) to remove the need for the user to click on a folder at each run, in *REID_IMU_Running_Event_ID.m* change lines 118 to:
+#### `REID_IMU_crash_catch.m`
+
+- **Before `end`:** add a guard for a zero-valued first IC:
 
 ```matlab
-subfunction_path = fileparts(mfilename('fullpath'));
+% If the first IC is 0
+if IC(1) == 0
+    IC(1) = 2;
+end
 ```
 
 ### 3. BiomechZoo
