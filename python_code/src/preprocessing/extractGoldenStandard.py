@@ -19,7 +19,7 @@ def extract_golden_standard(output_data):
         HS_r = HS_r.drop([0])
 
     if HS_l.empty:
-        HS_l = HS_r
+        HS_l = HS_l
     elif HS_l.time[0] == 0:
         HS_l = HS_l.drop([0])
 
