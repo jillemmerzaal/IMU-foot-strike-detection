@@ -33,7 +33,7 @@ def extract_golden_standard(output_data):
 
     # Final Contact Extraction (foot off)
     FO_r = y_right[["time"]].iloc[np.where(y_right["insoles_RightFoot_is_lifted"])].reset_index(drop=True)
-    FO_l = y_left[["time"]].iloc[np.where(y_left["insoles_LeftFoot_is_is_lifted"])].reset_index(drop=True)
+    FO_l = y_left[["time"]].iloc[np.where(y_left["insoles_LeftFoot_is_lifted"])].reset_index(drop=True)
 
     if FO_r.empty:
         FO_r = FO_r
