@@ -33,7 +33,7 @@ def kielmat_process_single_file(file_path, course, id, y_HS_true, y_FO_true, dat
 
         temp = FO_times*1000 # foot off times in ms
         y_FO_pred = np.zeros((len(temp), 2)) # expected structure by the rest of the pipeline
-        y_HS_pred[:,0] = temp 
+        y_FO_pred[:,0] = temp 
 
         # Create a structure matching what the pipeline expects:
         # results.y and results.y_hat
@@ -47,7 +47,7 @@ def kielmat_process_single_file(file_path, course, id, y_HS_true, y_FO_true, dat
         output_dir.mkdir(parents = True, exist_ok = True)
         savemat(output_file, {'results': results})
 
-        return f'{id}_{course}.mat Success'
+        return f'{id}_{course} Success'
     
     except Exception as e:
-        return f"FAILED: {file_path.name} - Error: {str(e)}"
+        return f"FAILED: {id}_{course} - Error: {str(e)}"

@@ -13,14 +13,17 @@ def extract_golden_standard(output_data):
     HS_r = y_right[["time"]].iloc[np.where(y_right["insoles_RightFoot_is_step"])].reset_index(drop=True)
     HS_l = y_left[["time"]].iloc[np.where(y_left["insoles_LeftFoot_is_step"])].reset_index(drop=True)
 
+    count = 0
     if HS_r.empty:
         HS_r = HS_r
     elif HS_r.time[0] == 0:
+        count += 1
         HS_r = HS_r.drop([0])
 
     if HS_l.empty:
         HS_l = HS_l
     elif HS_l.time[0] == 0:
+        count += 1
         HS_l = HS_l.drop([0])
 
     y_timings_r = HS_r.copy()
@@ -29,21 +32,12 @@ def extract_golden_standard(output_data):
 
     frames = [y_timings_r, y_timings_l]
 
-    y_HS = pd.concat(frames)
+    y_HS = pd.concat(frames).to_numpy().squeeze()
+    y_HS.sort()
 
     # Final Contact Extraction (foot off)
     FO_r = y_right[["time"]].iloc[np.where(y_right["insoles_RightFoot_is_lifted"])].reset_index(drop=True)
     FO_l = y_left[["time"]].iloc[np.where(y_left["insoles_LeftFoot_is_lifted"])].reset_index(drop=True)
-
-    if FO_r.empty:
-        FO_r = FO_r
-    elif FO_r.time[0] == 0:
-        FO_r = FO_r.drop([0])
-
-    if FO_l.empty:
-        FO_l = FO_l
-    elif FO_l.time[0] == 0:
-        FO_l = FO_l.drop([0])
 
     y_timings_r = FO_r.copy()
 
@@ -51,6 +45,13 @@ def extract_golden_standard(output_data):
 
     frames = [y_timings_r, y_timings_l]
 
-    y_FO = pd.concat(frames)
+    y_FO = pd.concat(frames).to_numpy().squeeze()
+    y_FO.sort()
     
+    if count == 2: # if both feet started on the ground void the first feet lift as it's not a real step
+        y_FO = y_FO[1:]
+        
+    if np.max(y_FO) < np.max(y_HS): # ensure the sequence to end with a foot off 
+        y_HS = y_HS[:-1]
+
     return y_HS, y_FO

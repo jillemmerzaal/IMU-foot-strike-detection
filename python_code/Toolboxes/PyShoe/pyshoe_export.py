@@ -25,7 +25,7 @@ SPECS = {  # G values are sensor dependent more at https://github.com/utiasSTARS
 }
 
 
-def pyshoe_process_single_file(file_path, course, id, y_true, data_path):
+def pyshoe_process_single_file(file_path, course, id, y_HS_true, y_FO_true, data_path):
     """
     Reads the file, then runs all 4 detectors.
     """
@@ -57,11 +57,14 @@ def pyshoe_process_single_file(file_path, course, id, y_true, data_path):
             
             padded_left = np.insert(steps_left, 0, False).astype(int)
             diff_left = np.diff(padded_left)
-            ic_indices_left = np.where(diff_left == 1)[0]
+            HS_indices_left = np.where(diff_left == 1)[0]
+            FO_indices_left = np.where(diff_left == -1)[0]
             # Case where foot started stationary
             if steps_left[0]:
-                ic_indices_left = ic_indices_left[1:]
-            ic_times_left = time[ic_indices_left]
+                HS_indices_left = HS_indices_left[1:]
+                FO_indices_left = FO_indices_left[1:]
+            HS_times_left = time[HS_indices_left]
+            FO_times_left = time[FO_indices_left]
 
             # Right Foot
             ins_right = INS(imu_right, sigma_a=0.00098, sigma_w=8.7266463e-5, T=1.0/60) 
@@ -70,20 +73,28 @@ def pyshoe_process_single_file(file_path, course, id, y_true, data_path):
             
             padded_right = np.insert(steps_right, 0, False).astype(int)
             diff_right = np.diff(padded_right)
-            ic_indices_right = np.where(diff_right == 1)[0]
+            HS_indices_right = np.where(diff_right == 1)[0]
+            FO_indices_right = np.where(diff_right == -1)[0]
             if steps_right[0]:
-                ic_indices_right = ic_indices_right[1:]
-            ic_times_right = time[ic_indices_right]
+                HS_indices_right = HS_indices_right[1:]
+                FO_indices_right = FO_indices_right[1:]
+            HS_times_right = time[HS_indices_right]
+            FO_times_right = time[FO_indices_right]
 
             # Combine
-            all_ic_times = np.concatenate((ic_times_left, ic_times_right))
+            all_HS_times = np.concatenate((HS_times_left, HS_times_right))
+            all_FO_times = np.concatenate((FO_times_left, FO_times_right))
             
-            y_pred = np.zeros((len(all_ic_times), 2))
-            y_pred[:,0] = all_ic_times
+            y_HS_pred = np.zeros((len(all_HS_times), 2))
+            y_FO_pred = np.zeros((len(all_FO_times), 2))
+            y_HS_pred[:,0] = all_HS_times
+            y_FO_pred[:,0] = all_FO_times
 
             results = {
-                "y": y_true,
-                "y_hat": y_pred
+                'y_HS': y_HS_true,         # true
+                'y_FO': y_FO_true,
+                'y_hat_HS': y_HS_pred,     # pred
+                'y_hat_FO': y_FO_pred
             }
 
             # Save specific detector output
