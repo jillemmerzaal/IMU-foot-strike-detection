@@ -209,3 +209,5 @@ __marimo__/
 data/
 tests/
 python_code/.venv311
+*.ipynb
+.gitignore
