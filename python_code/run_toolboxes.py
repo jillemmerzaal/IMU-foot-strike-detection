@@ -18,15 +18,7 @@ def get_ytrue(course, id):
 
         data = pd.read_csv(file_path, usecols = COLS)
 
-        temp = extract_golden_standard(data)
-
-        y_HS = np.zeros((len(temp[0]), 2))
-        y_HS[:,0] = temp[0]
-
-        y_FO = np.zeros((len(temp[1]), 2))
-        y_FO[:,0] = temp[1]
-
-        return y_HS, y_FO
+        return extract_golden_standard(data)
     
     except Exception as e:
         return f"ERR: {str(e)}"
