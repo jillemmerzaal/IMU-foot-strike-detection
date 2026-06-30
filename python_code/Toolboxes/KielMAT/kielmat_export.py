@@ -11,7 +11,7 @@ SAMPLING_FREQUENCY = 60
 
 
 def kielmat_process_single_file(file_path, course, id, y_HS_true, y_FO_true, data_path):
-    output_dir = data_path / "toolbox1" / "KielMAT"
+    output_dir = data_path / "toolbox_results" / "KielMAT"
     output_file = output_dir / f"{id}_{course}.mat"
 
     if output_file.exists():

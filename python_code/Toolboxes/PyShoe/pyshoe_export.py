@@ -32,7 +32,7 @@ def pyshoe_process_single_file(file_path, course, id, y_HS_true, y_FO_true, data
     # Look at the disk first to see which detectors actually need to be run
     detectors_to_run = []
     for detector_name in DETECTORS:
-        out_file = data_path / "toolbox1" / detector_name / f'{id}_{course}.mat'
+        out_file = data_path / "toolbox_results" / detector_name / f'{id}_{course}.mat'
         if not out_file.exists():
             detectors_to_run.append((detector_name, out_file))
             
