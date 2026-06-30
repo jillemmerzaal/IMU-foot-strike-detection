@@ -18,28 +18,22 @@ def get_ytrue(course, id):
 
         data = pd.read_csv(file_path, usecols = COLS)
 
-        temp = extract_golden_standard(data).to_numpy().squeeze()
-        temp.sort()
-
-        ytrue = np.zeros((len(temp), 2))
-        ytrue[:,0] = temp
-
-        return ytrue
+        return extract_golden_standard(data)
     
     except Exception as e:
-        return None
+        return f"ERR: {str(e)}"
     
 def process_file_all_toolboxes(file_path):
     id = file_path.parts[-2]
     course = file_path.parts[-3]
 
     # Get ground truth
-    y_true = get_ytrue(course, id)
-    if y_true is None:
+    y_HS, y_FO = get_ytrue(course, id)
+    if y_HS is None or y_FO is None:
         return f'FAILED: {id}_{course} - Could not load labels.csv'
     
-    res_kielmat = kielmat_process_single_file(file_path, course, id, y_true, DATA_PATH)
-    res_pyshoe = pyshoe_process_single_file(file_path, course, id, y_true, DATA_PATH)
+    res_kielmat = kielmat_process_single_file(file_path, course, id, y_HS, y_FO, DATA_PATH)
+    res_pyshoe = pyshoe_process_single_file(file_path, course, id, y_HS, y_FO, DATA_PATH)
 
     return f"{id}_{course} => KielMAT: [{res_kielmat}] | PyShoe: [{res_pyshoe}]"
 
