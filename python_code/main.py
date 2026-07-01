@@ -37,8 +37,13 @@ def load_metrics(event: str, fname: str) -> pd.DataFrame:
 
 
 def save_descriptives(df: pd.DataFrame, group_col: str, event: str, fname: str) -> None:
-    descriptives = df.groupby(group_col, observed=True).agg(AGG_SPEC).sort_values(("accuracy", "mean"))
+    descriptives = df.groupby(group_col, observed=True).agg(AGG_SPEC)
     descriptives[("detected", "sum")] = descriptives[("TP", "sum")] + descriptives[("FP", "sum")]
+    descriptives[("accuracy_aggregate", "")] = (
+        descriptives[("TP", "sum")] /
+        (descriptives[("TP", "sum")] + descriptives[("FP", "sum")] + descriptives[("FN", "sum")])
+    ).round(2)
+    descriptives = descriptives.sort_values(("accuracy_aggregate", ""))
     descriptives.to_csv(OUT / event / fname)
 
 
@@ -51,7 +56,9 @@ def plot_and_save(df: pd.DataFrame, x: str, order: list, event: str, prefix: str
 
 
 def get_order(df: pd.DataFrame, group_col: str) -> list:
-    return df.groupby(group_col)["accuracy"].mean().sort_values(ascending=False).index.to_list()
+    agg = df.groupby(group_col)[["TP", "FP", "FN"]].sum()
+    agg["accuracy_aggregate"] = agg["TP"] / (agg["TP"] + agg["FP"] + agg["FN"])
+    return agg["accuracy_aggregate"].sort_values(ascending=False).index.to_list()
 
 
 # Check missing data (already done a priori, but for clarity it is still here)
