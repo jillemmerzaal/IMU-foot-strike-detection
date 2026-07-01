@@ -5,108 +5,88 @@ from python_code.src.processing.no_recognized_steps import missing_data
 from python_code.src.utils.Visualize import box_all, box_segmented
 from python_code.src.processing.metrics import calculate_metrics
 
-
-# Set relevant paths
+# Initialize paths
 root = Path(__file__).parent.parent
-fld = os.path.join(root, "data", "toolbox1")
+fld  = root / "data" / "toolbox_results"
+OUT  = root / "data" / "output"
 
-# Determine the algorithms that have missing data.
-missing_data(fld, "output")
-# Exclude benson from further analysis --> not suited for walking.
+# Algorithms to exclude based on missing data
+SKIP = {
+    "HS": ["Auvinet", "Benson"],
+    "FO": ["Auvinet", "Benson", "Mizrahi", "Norris", "Reenalda", "Whelan"],
+}
 
-#%% Full walking course analysis
-calculate_metrics(fld, "output", surface_split=False, fname="metrics_all.csv")
+# Aggregation spec (shared across all groupby calls)
+AGG_SPEC = {
+    "total":      ["sum"],
+    "TP":         ["sum"],
+    "FP":         ["sum"],
+    "FN":         ["sum"],
+    "f1_score":   ["mean", "std", "count"],
+    "accuracy":   ["mean", "std", "count"],
+    "precision":  ["mean", "std", "count"],
+    "recall":     ["mean", "std", "count"],
+    "error (ms)": ["mean", "std", "count"],
+}
 
-df_all = pd.read_csv(os.path.join(root, "data","output", "metrics_all.csv"), index_col=0)
-df_all["algorithm"] = df_all["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
-
-
-# Set x and y columns
-x = "algorithm"
-y= "accuracy"
-# Calculate basis descriptives statistics per algorithm.
-descriptives = df_all.groupby(x, observed=True).agg({'total': ["sum"],
-                                                     'TP': ["sum"],
-                                                     'FP': ["sum"],
-                                                     'FN': ["sum"],
-                                                     'f1_score':['mean', 'std', 'count'],
-                                                     'accuracy': ['mean', 'std', 'count'],
-                                                     'precision':['mean', 'std', 'count'],
-                                                     'recall': ['mean', 'std', 'count'],
-                                                     "error (ms)": ['mean', 'std', 'count'],}).sort_values(('accuracy', 'mean'))
-
-descriptives[("detected", "sum")] =descriptives[("TP", "sum")] + descriptives[("FP", "sum")]
-descriptives.to_csv(os.path.join(root, "data", "output", "desciptives_all.csv"))
-
-# Get performance order
-average_y = df_all.groupby([x])["accuracy"].mean()
-desired_order_algo = average_y.sort_values(ascending=False).index.to_list()
-
-# Plot the accuracy results
-fig = box_all(data=df_all, x=x, y=y, desired_order=desired_order_algo, points="outliers")
-fig.write_image(os.path.join(root, "data", "output", "performance_all.png"),  width=1650, height=900, scale=1)
-
-# Plot the timing error results
-y="error (ms)"
-fig = box_all(data=df_all, x=x, y=y, desired_order=desired_order_algo, points="outliers")
-fig.write_image(os.path.join(root, "data", "output", "error_all.png"), width=1650, height=900, scale=1)
-
-#%% Analysis per surface for best algorithm
-calculate_metrics(fld, "output", surface_split=True, fname="metrics_split.csv")
-
-# Calculate basis descriptives statistics per algorithms per surface.
-df_split = pd.read_csv(os.path.join(root, "data", "output", "metrics_split.csv"), index_col=0)
-df_split["algorithm"] = df_split["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
-
-# Only retain the best algorithm
-best = desired_order_algo[0]
-df_best = df_split[df_split.algorithm == best].copy().reset_index(drop=True)
-
-# Set x and y columns
-x = "condition"
-y= "accuracy"
-# Calculate basis descriptives statistics per surface.
-descriptives = df_best.groupby(x, observed=True).agg({'total': ["sum"],
-                                                     'TP': ["sum"],
-                                                     'FP': ["sum"],
-                                                      'FN': ["sum"],
-                                                     'f1_score':['mean', 'std', 'count'],
-                                                     'accuracy': ['mean', 'std', 'count'],
-                                                     'precision':['mean', 'std', 'count'],
-                                                     'recall': ['mean', 'std', 'count'],
-                                                      "error (ms)": ['mean', 'std', 'count']}).sort_values(('accuracy', 'mean'))
-
-descriptives[("detected", "sum")] = descriptives[("TP", "sum")] + descriptives[("FP", "sum")]
-
-descriptives.to_csv(os.path.join(root, "data", "output", "desciptives_best.csv"))
-
-#get performance order per surface
-average_f1 = df_best.groupby([x])[y].mean()
-desired_order = average_f1.sort_values(ascending=False).index.to_list()
-
-fig_best = box_all(data=df_best, x=x, y=y, desired_order=desired_order, points="outliers")
-fig_best.write_image(os.path.join(root, "data", "output", "performance_best.png"), width=1650, height=900, scale=1)
-
-# Plot the timing error results
-y="error (ms)"
-fig_best = box_all(data=df_best, x=x, y=y, desired_order=desired_order, points="outliers")
-fig_best.write_image(os.path.join(root, "data", "output", "error_best.png"), width=1650, height=900, scale=1)
-
-#%% Analysis per surface for all algorithms
-df_surface = pd.read_csv(os.path.join(root, "data", "output", "metrics_split.csv"), index_col=0)
-# Keep only the final path component in algorithm
-df_surface["algorithm"] = df_surface["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
-# (equivalent
-# df_segmented = pd.read_csv(os.path.join(outcome_fld, "results_segmented.csv"))
-
-# Set x and y columns
-dim1 = "algorithm"
-x = "condition"
-y= "accuracy"
+# Helpers
+def load_metrics(event: str, fname: str) -> pd.DataFrame:
+    df = pd.read_csv(OUT / event / fname, index_col=0)
+    df["algorithm"] = df["algorithm"].astype(str).str.split(r"[\\/]").str[-1]
+    return df
 
 
+def save_descriptives(df: pd.DataFrame, group_col: str, event: str, fname: str) -> None:
+    descriptives = df.groupby(group_col, observed=True).agg(AGG_SPEC).sort_values(("accuracy", "mean"))
+    descriptives[("detected", "sum")] = descriptives[("TP", "sum")] + descriptives[("FP", "sum")]
+    descriptives.to_csv(OUT / event / fname)
 
-fig_surface = box_segmented(df_surface, dim1, x, y, desired_order=desired_order_algo, points="outliers")
-fig_surface.write_image(os.path.join(root, "data", "output", "performance_surface.png"), width=1650, height=900, scale=1)
 
-# %%
+def plot_and_save(df: pd.DataFrame, x: str, order: list, event: str, prefix: str) -> None:
+    fig = box_all(data=df, x=x, y="accuracy", desired_order=order, points="outliers")
+    fig.write_image(OUT / event / f"{prefix}_performance.png", width=1650, height=900, scale=1)
+
+    fig = box_all(data=df, x=x, y="error (ms)", desired_order=order, points="outliers")
+    fig.write_image(OUT / event / f"{prefix}_error.png", width=1650, height=900, scale=1)
+
+
+def get_order(df: pd.DataFrame, group_col: str) -> list:
+    return df.groupby(group_col)["accuracy"].mean().sort_values(ascending=False).index.to_list()
+
+
+# Check missing data (already done a priori, but for clarity it is still here)
+for event in ("HS", "FO"):
+    missing_data(str(fld), event, "output")
+
+# Full walking course analysis
+orders = {}
+for event in ("HS", "FO"):
+    calculate_metrics(str(fld), event=event, skip=SKIP[event], out_folder="output",
+                      surface_split=False, fname="metrics_all.csv")
+
+    df_all = load_metrics(event, "metrics_all.csv")
+    save_descriptives(df_all, "algorithm", event, "descriptives_all.csv")
+
+    orders[event] = get_order(df_all, "algorithm")
+    plot_and_save(df_all, x="algorithm", order=orders[event], event=event, prefix="all")
+
+#  Per-surface analysis — best algorithm only
+for event in ("HS", "FO"):
+    calculate_metrics(str(fld), event=event, skip=SKIP[event], out_folder="output",
+                      surface_split=True, fname="metrics_split.csv")
+
+    df_split = load_metrics(event, "metrics_split.csv")
+    best = orders[event][0]
+    df_best = df_split[df_split.algorithm == best].copy().reset_index(drop=True)
+
+    save_descriptives(df_best, "condition", event, "descriptives_best.csv")
+
+    surface_order = get_order(df_best, "condition")
+    plot_and_save(df_best, x="condition", order=surface_order, event=event, prefix="best")
+
+#  Per-surface analysis — all algorithms
+for event in ("HS", "FO"):
+    df_surface = load_metrics(event, "metrics_split.csv")
+    fig = box_segmented(df_surface, dim1="algorithm", x="condition", y="accuracy",
+                        desired_order=orders[event], points="outliers")
+    fig.write_image(OUT / event / "performance_surface.png", width=1650, height=900, scale=1)

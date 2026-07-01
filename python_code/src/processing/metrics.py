@@ -12,19 +12,21 @@ from python_code.src.utils.metricsCalculator import MetaData, enrich_metadata, e
 from python_code.src.utils.dict_manupulations import DictManupulations
 
 
-def calculate_metrics(fld:str, out_folder:str, surface_split:bool=False, fname:str=None) -> None:
+def calculate_metrics(fld:str, event:str, skip:list, out_folder:str, surface_split:bool=False, fname:str=None) -> None:
     """
     Small function to calculate the performance metric per algorithm, per subject, per course.
     It has two modes: 1) full walking course; 2) split per surface.
 
     Parameters:
         fld (str): file path to the root data folder.
+        event (str): suffix to the event to look for. either HS of FO
+        skip (list): list of algorithms to skip
         out_folder (str): to name the output folder
         surface_split (bool):
 
     Notes:
         * Reads .Mat files
-        * Specifically looks for the fieldnames "y" and "y_hat"
+        * Specifically looks for the fieldnames "y_HS" and "y_hat_HS" OR y_FO and y_hat_FO
         * Automatically saves a Pandas DataFrame to csv
     """
 
@@ -41,12 +43,16 @@ def calculate_metrics(fld:str, out_folder:str, surface_split:bool=False, fname:s
         course_name = filename.split("_")[1]
 
         # loop through the algorithms.
-        if algo != "Benson" and algo != "Auvinet":
+        if algo not in skip:
             # load matlab data
             mat_data = loadmat(f, struct_as_record=False, squeeze_me=True)
             temp_results = mat_data["results"]
-            yhat = getattr(temp_results, "y_hat")[:,0]
-            y = getattr(temp_results, "y")[:,0]
+            if getattr(temp_results, f"y_hat_{event}" ).ndim == 2:
+                yhat = getattr(temp_results, f"y_hat_{event}" )[:,0]
+            else:
+                continue
+
+            y = getattr(temp_results, f"y_{event}")[:,0]
             if surface_split:
                 surface_ic = split_by_surface(f, y)
                 outcome = evaluate_algorithm_per_surface(y, yhat, surface_ic)
@@ -77,7 +83,7 @@ def calculate_metrics(fld:str, out_folder:str, surface_split:bool=False, fname:s
 
     df_all = DictManupulations.from_dataclass_to_dataframe(metrics)
 
-    save_fld = os.path.join(Path(fld).parent, out_folder)
+    save_fld = os.path.join(Path(fld).parent, out_folder, event)
     if not os.path.exists(save_fld):
         os.makedirs(save_fld)
 

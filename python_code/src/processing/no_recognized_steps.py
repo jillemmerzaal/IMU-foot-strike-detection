@@ -7,17 +7,18 @@ from biomechzoo.utils.engine import engine
 from python_code.src.utils.fileparts import fileparts
 
 
-def missing_data(fld:str, out_folder:"str") -> None:
+def missing_data(fld:str, event:str, out_folder:"str") -> None:
     """
     Small function to determine the amount of missing data.
 
     Parameters:
         fld (str): file path to the root data folder.
+        event (str): suffix to the event to look for. either HS of FO
         out_folder (str): to name the output folder
 
     Notes:
         * Reads .Mat files
-        * Specifically looks for the fieldnames "y" and "y_hat"
+        * Specifically looks for the fieldnames "y_HS" and "y_hat_HS"
         * Automatically saves a Pandas DataFrame to csv
     """
 
@@ -37,14 +38,14 @@ def missing_data(fld:str, out_folder:"str") -> None:
         # load matlab data
         mat_data = loadmat(f, struct_as_record=False, squeeze_me=True)
         temp_results = mat_data["results"]
-        yhat_data = getattr(temp_results, "y_hat")
+        yhat_data = getattr(temp_results, f"y_hat_{event}")
 
         # determine if yhat data is empty
         if len(yhat_data) == 0:
             no_steps = missing_data[algo]["missing"] + 1
             missing_data[algo]["missing"] = no_steps
         else:
-            steps = data = missing_data[algo]["no_missing"] + 1
+            steps = missing_data[algo]["no_missing"] + 1
             missing_data[algo]["no_missing"] = steps
 
     # calculate percentage missing
@@ -56,7 +57,7 @@ def missing_data(fld:str, out_folder:"str") -> None:
     missing_data_df = pd.DataFrame.from_dict(missing_data).T
 
 
-    save_fld = os.path.join(Path(fld).parent, out_folder)
+    save_fld = os.path.join(Path(fld).parent, out_folder, event)
     if not os.path.exists(save_fld):
         os.makedirs(save_fld)
 
