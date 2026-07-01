@@ -41,8 +41,7 @@ def box_segmented(df:DataFrame, dim1:str, x:str, y:str, desired_order:list[str],
         fig.add_trace(go.Box(y=filtered_df["accuracy"], x=filtered_df["algorithm"],
                              name=walk_mode), row=1, col=1)
 
-    fig.update_layout(title="Box Plot of Accuracy Scores for the surfaces Across Algorithms",
-                      xaxis_title="Algorithm",
+    fig.update_layout(xaxis_title="Algorithm",
                       yaxis_title="accuracy",
                       font=dict(size=24),
                       boxmode='group', height=750,
