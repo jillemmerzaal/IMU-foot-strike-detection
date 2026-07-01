@@ -77,6 +77,13 @@ for event in ("HS", "FO"):
     orders[event] = get_order(df_all, "algorithm")
     plot_and_save(df_all, x="algorithm", order=orders[event], event=event, prefix="all")
 
+#  Per-surface analysis — all algorithms
+for event in ("HS", "FO"):
+    df_surface = load_metrics(event, "metrics_split.csv")
+    fig = box_segmented(df_surface, dim1="algorithm", x="condition", y="accuracy",
+                        desired_order=orders[event], points="outliers")
+    fig.write_image(OUT / event / "performance_surface.png", width=1650, height=900, scale=1)
+
 #  Per-surface analysis — best algorithm only
 for event in ("HS", "FO"):
     calculate_metrics(str(fld), event=event, skip=SKIP[event], out_folder="output",
@@ -90,10 +97,3 @@ for event in ("HS", "FO"):
 
     surface_order = get_order(df_best, "condition")
     plot_and_save(df_best, x="condition", order=surface_order, event=event, prefix="best")
-
-#  Per-surface analysis — all algorithms
-for event in ("HS", "FO"):
-    df_surface = load_metrics(event, "metrics_split.csv")
-    fig = box_segmented(df_surface, dim1="algorithm", x="condition", y="accuracy",
-                        desired_order=orders[event], points="outliers")
-    fig.write_image(OUT / event / "performance_surface.png", width=1650, height=900, scale=1)
