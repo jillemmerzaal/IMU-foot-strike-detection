@@ -84,16 +84,18 @@ for event in ("HS", "FO"):
                         desired_order=orders[event], points="outliers")
     fig.write_image(OUT / event / "performance_surface.png", width=1650, height=900, scale=1)
 
-#  Per-surface analysis — best algorithm only
+#  Per-surface analysis — top 2 algorithms
 for event in ("HS", "FO"):
     calculate_metrics(str(fld), event=event, skip=SKIP[event], out_folder="output",
                       surface_split=True, fname="metrics_split.csv")
 
     df_split = load_metrics(event, "metrics_split.csv")
-    best = orders[event][0]
-    df_best = df_split[df_split.algorithm == best].copy().reset_index(drop=True)
 
-    save_descriptives(df_best, "condition", event, "descriptives_best.csv")
+    for rank, algo in enumerate(orders[event][:2], start=1):
+        label = {1: "best", 2: "second"}[rank]
+        df_algo = df_split[df_split.algorithm == algo].copy().reset_index(drop=True)
 
-    surface_order = get_order(df_best, "condition")
-    plot_and_save(df_best, x="condition", order=surface_order, event=event, prefix="best")
+        save_descriptives(df_algo, "condition", event, f"descriptives_{label}.csv")
+
+        surface_order = get_order(df_algo, "condition")
+        plot_and_save(df_algo, x="condition", order=surface_order, event=event, prefix=label)
